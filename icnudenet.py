@@ -5,6 +5,7 @@ import cv2
 import numpy as np
 import onnxruntime
 import torch
+import json
 
 __labels = [
     "FEMALE_GENITALIA_COVERED",
@@ -126,7 +127,7 @@ def _postprocess(output, resize_factor, pad_left, pad_top):
     return detections
 
 
-class NudenetDetector:
+class ICNudenetDetector:
 
     def __init__(self, providers=None):
         self.onnx_session = onnxruntime.InferenceSession(
@@ -161,8 +162,8 @@ class NudenetDetector:
             },
         }
 
-    RETURN_TYPES = ("IMAGE",)
-    RETURN_NAMES = ("IMAGE",)
+    RETURN_TYPES = ("IMAGE","STRING",)
+    RETURN_NAMES = ("IMAGE","indices",)
 
     FUNCTION = "detect_and_blur"
 
@@ -172,6 +173,7 @@ class NudenetDetector:
 
     def detect_and_blur(self, image: torch.Tensor):
         all_imgs = []
+        detected_indices = {}
         for i in range(len(image)):
             img = image[i].numpy()
             preprocessed_image, resize_factor, pad_left, pad_top = preprocess(
@@ -185,6 +187,9 @@ class NudenetDetector:
             ]
             # all_detections.append(detections)
             if detections:
+                if not detected_indices[detections["class"]]:
+                    detected_indices[detections["class"]] = []
+                    detected_indices[detections["class"]].append(i)
                 print("NSFW DETECTED: ", detections)
                 img = pixelate_image(img, 16)
 
@@ -195,7 +200,7 @@ class NudenetDetector:
             #     # change these pixels to pure black
             #     img[y: y + h, x: x + w] = (0, 0, 0)
             all_imgs.append(img)
-        return (torch.tensor(np.array(all_imgs)),)
+        return (torch.tensor(np.array(all_imgs)), json.dumps(detected_indices), )
 
     # @classmethod
     # def IS_CHANGED(s, image, string_field, int_field, float_field, print_to_screen):
@@ -205,10 +210,10 @@ class NudenetDetector:
 # A dictionary that contains all nodes you want to export with their names
 # NOTE: names should be globally unique
 NODE_CLASS_MAPPINGS = {
-    "NudenetDetector": NudenetDetector
+    "NudenetDetector": ICNudenetDetector
 }
 
 # A dictionary that contains the friendly/humanly readable titles for the nodes
 NODE_DISPLAY_NAME_MAPPINGS = {
-    "NudenetDetector": "NudenetDetector"
+    "ICNudenetDetector": "ICNudenetDetector"
 }
