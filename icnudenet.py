@@ -187,9 +187,9 @@ class ICNudenetDetector:
             ]
             # all_detections.append(detections)
             if detections:
-                if not detected_indices[detections["class"]]:
-                    detected_indices[detections["class"]] = []
-                    detected_indices[detections["class"]].append(i)
+                # if not detected_indices[detections["class"]]:
+                #     detected_indices[detections["class"]] = []
+                # detected_indices[detections["class"]].append(i)
                 print("NSFW DETECTED: ", detections)
                 img = pixelate_image(img, 16)
 
