@@ -169,7 +169,7 @@ class ICNudenetDetector:
 
     # OUTPUT_NODE = False
 
-    CATEGORY = "nsfw"
+    CATEGORY = "ic/nsfw"
 
     def detect_and_blur(self, image: torch.Tensor):
         all_imgs = []
