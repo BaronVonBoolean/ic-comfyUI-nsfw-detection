@@ -189,7 +189,7 @@ class ICNudenetDetector:
             if detections:
                 for detection in detections:
                     det_class = detection["class"]
-                    if not detected_indices[det_class]:
+                    if det_class not in detected_indices:
                         detected_indices[det_class] = []
                     detected_indices[det_class].append(i)
                 print("NSFW DETECTED: ", detections) # {'class': 'FEMALE_BREAST_EXPOSED', 'score': 0.593036949634552, 'box': [494, 189, 118, 114]}
